@@ -1,0 +1,52 @@
+name: Nothing to do
+
+on:
+  release:
+    types: [published]
+ # schedule:
+  #  - cron: "0 */24 * * *"
+  watch:
+    types: [started]
+
+jobs:
+  auto:
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id # 自己点的 start
+    steps:
+        # 安装java环境
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1  #使用官方脚本创建java环境
+        with:
+          java-version: 1.8
+      - name: Checkout
+        uses: actions/checkout@v2.3.4      
+      # 默认安装有 python 环境
+      - name: Install Python requests beautifulsoup4
+        run: |
+          pip3 install requests
+          pip3 install beautifulsoup4
+          pip3 install lxml          
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+      #- name: Get Quote
+       # run: |
+        #  python3 quote.py
+         # java -jar quoteCollect.jar        
+      - name: Save time
+        run: |
+          echo `date +"%Y-%m-%d %H:%M:%S"` begin > time.txt            
+      # 上传新的 json 到仓库        
+      - name: Commit 
+        run: |
+          git pull
+          git config --global user.email donald.h.qin@outlook.com
+          git config --global user.name czqu
+          git add .
+          git commit -m "add new Quote" -a
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        env:
+          TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          github_token: $TOKEN
+          branch: master
